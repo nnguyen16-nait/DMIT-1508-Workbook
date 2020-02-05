@@ -59,7 +59,7 @@ CREATE TABLE StudentCourses
                                     NOT NULL,
     [Year]          tinyint         NOT NULL,
     Term            char(3)         NOT NULL,
-    FinalMarks      tinyint         NOT NULL,
+    FinalMarks      tinyint             NULL,
     [Status]        char(1)         NOT NULL,
     -- Table-level definition for Composite Primary Keys
     CONSTRAINT PK_StudentCourses_StudentID_CourseNumber
