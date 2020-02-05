@@ -30,7 +30,9 @@ CREATE TABLE Students
     GivenName        varchar(50)     NOT NULL,
     Surname          varchar(50)     NOT NULL,
     DateOfBirth      datetime        NOT NULL,
-    Enrolled         bit             NOT NULL,   
+    Enrolled         bit             
+        CONSTRAINT DF_Students_Enrolled -- DF = Default
+            DEFAULT (1)              NOT NULL,   
 )
 CREATE TABLE Courses
 (
@@ -40,7 +42,9 @@ CREATE TABLE Courses
     [Name]          varchar(10)     NOT NULL,
     Credits         decimal(3,1)    NOT NULL,
     [Hours]         tinyint         NOT NULL,
-    Active          bit             NOT NULL,
+    Active          bit             
+        CONSTRAINT DF_COURSES_Active
+            Default (1)             NOT NULL,
     Cost            money           NOT NULL
 )
 CREATE TABLE StudentCourses
