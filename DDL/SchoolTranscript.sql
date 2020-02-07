@@ -25,11 +25,18 @@ CREATE TABLE Students
     StudentID        int
         CONSTRAINT PK_STUDENTS_StudentID             
             PRIMARY KEY
-            -- IDENTITY (INITIAL VALUE, INCREMENTS(
+            -- IDENTITY (INITIAL VALUE, INCREMENTS)
         IDENTITY(20200001,1)         NOT NULL,
     GivenName        varchar(50)     NOT NULL,
-    Surname          varchar(50)     NOT NULL,
-    DateOfBirth      datetime        NOT NULL,
+    Surname          varchar(50)
+		CONSTRAINT CK_Student_Surname
+--			CHECK (Surname LIKE '__%')     -- like allows us to do a "pattern-match, % is a wildcare for zero or more characters (letter digit, or other character, _is a wildcare for a single chracter (letter digit or other character, [] are used to represent a range or set of characters that are allowed
+			CHECK (Surname LIKE '[a-z][a-z]%') -- two letters plus any other characters						 
+									 NOT NULL,
+    DateOfBirth      datetime
+		CONSTRAINT CK_Students_DateOfBirth
+			CHECK (DateOfBirth < GETDATE())
+							         NOT NULL,
     Enrolled         bit             
         CONSTRAINT DF_Students_Enrolled -- DF = Default
             DEFAULT (1)              NOT NULL,   
@@ -40,12 +47,19 @@ CREATE TABLE Courses
         CONSTRAINT PK_COURSES_Number 
             PRIMARY KEY             NOT NULL,
     [Name]          varchar(10)     NOT NULL,
-    Credits         decimal(3,1)    NOT NULL,
-    [Hours]         tinyint         NOT NULL,
+    Credits         decimal(3,1)
+		CONSTRAINT CK_COURSES_Credits
+			CHECK (Credits > 0)		NOT NULL,
+    [Hours]         tinyint
+		CONSTRAINT CK_COURSES_HOURS
+			CHECK ([HOURS] BETWEEN 15 AND 100)
+									NOT NULL,
     Active          bit             
         CONSTRAINT DF_COURSES_Active
             Default (1)             NOT NULL,
-    Cost            money           NOT NULL
+    Cost            money
+		CONSTRAINT CK_COURSES_COST
+			CHECK (COST > 0)        NOT NULL
 )
 CREATE TABLE StudentCourses
 (
@@ -60,7 +74,15 @@ CREATE TABLE StudentCourses
     [Year]          tinyint         NOT NULL,
     Term            char(3)         NOT NULL,
     FinalMarks      tinyint             NULL,
-    [Status]        char(1)         NOT NULL,
+    [Status]        char(1)
+		CONSTRAINT CK_StudentCourses_Status
+			CHECK ([Status] = 'E' OR
+				   [Status] = 'C' OR
+				   [Status] = 'W')
+			-- Check ([Status] IN ('E', 'C', 'W'))
+		CONSTRAINT DF_StudentCourses_Status
+			DEFAULT ('E')
+							        NOT NULL,
     -- Table-level definition for Composite Primary Keys
     CONSTRAINT PK_StudentCourses_StudentID_CourseNumber
         PRIMARY KEY (StudentID, CourseNumber)
