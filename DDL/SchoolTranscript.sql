@@ -80,10 +80,31 @@ CREATE TABLE StudentCourses
 				   [Status] = 'C' OR
 				   [Status] = 'W')
 			-- Check ([Status] IN ('E', 'C', 'W'))
-		CONSTRAINT DF_StudentCourses_Status
-			DEFAULT ('E')
+--		CONSTRAINT DF_StudentCourses_Status
+--			DEFAULT ('E')
 							        NOT NULL,
     -- Table-level definition for Composite Primary Keys
     CONSTRAINT PK_StudentCourses_StudentID_CourseNumber
         PRIMARY KEY (StudentID, CourseNumber)
+)
+/*ALTER TABLE Students
+	ADD CONTSTRAINT CK_STUDENTS_PostalCode
+		CHECK (POSTALCode LIKE '[A-Z][0-9]{A-Z][0-9][A-Z][0-9]')*/
+
+ALTER TABLE StudentCourses
+	ADD CONSTRAINT DF_StudentCourses_Status
+		DEFAULT ('E') FOR [Status] -- In an alter Table statement the comumn must be specified for the default value
+GO
+
+/* -------------------------------- Odds and Ends-----------------------------*/
+sp_help Students -- Get schema information for the students table
+
+-- in a table, we can have some columns be 'calculated' or 'derived' columns
+-- where the value of the column is a calculation from other columns
+CREATE TABLE Invoice
+(
+	InvoiceID		int			NOT NULL,
+	Subtotal		money		NOT NULL,
+	GST				money		NOT NULL,
+	Total			AS Subtotal + GST -- this is a computed column
 )
