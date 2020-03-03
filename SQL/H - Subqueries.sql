@@ -25,6 +25,14 @@ WHERE  PaymentTypeDescription = 'cash'
 -- TODO: Student Answer Here
 
 -- 2.b. Select the names of all the students in the 'Association of Computing Machinery' club. Use a subquery for your answer. When you make your answer, ensure the outmost query only uses the Student table in its FROM clause.
+SELECT FirstName + ' ' + LastName AS 'Student'
+FROM Student
+WHERE StudentID IN
+	(SELECT StudentID
+	 FROM Activity
+	 WHERE ClubID =
+			(SELECT ClubID FROM Club
+			 WHERE ClubName = 'Association of Computing Machinery') )
 
 --3. Select All the staff full names for staff that have taught a course.
 SELECT FirstName + ' ' + LastName AS 'Staff'
@@ -41,7 +49,15 @@ FROM Staff
 
 --4. Select All the staff full names that taught DMIT172.
 -- TODO: Student Answer Here
-
+SELECT FirstName + ' ' + LastName AS 'Staff'
+FROM   Staff
+WHERE  StaffID IN 
+    (SELECT DISTINCT StaffID 
+	 FROM Registration
+	 WHERE CourseID = 
+		(SELECT CourseID
+		 FROM Course
+		 WHERE CourseId = 'DMIT172'))
 
 --5. Select All the staff full names of staff that have never taught a course
 SELECT FirstName + ' ' + LastName AS 'Staff'
@@ -110,7 +126,10 @@ WHERE City = 'Edm'
 
 -- 9. What is the avg mark for each of the students from Edm? Display their StudentID and avg(mark)
 -- TODO: Student Answer Here...
-
+SELECT AVG(Mark) AS 'Average'
+FROM Registration
+WHERE StudentID IN (SELECT StudentID FROM Student WHERE City = 'EDM')
+ 
 -- 10. Which student(s) have the highest average mark? Hint - This can only be done by a subquery.
 -- TODO: Student Answer Here...
 
