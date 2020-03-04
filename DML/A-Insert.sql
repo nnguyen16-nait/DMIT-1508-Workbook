@@ -16,6 +16,12 @@ GO -- Execute the code up to this point as a single batch
     VALUES ('A', 'Value', 'Per', 'Column'),
            ('Another', 'Row', 'Of', 'Values')
     
+	When inserting values, you can use subqueries for individual values
+	provided that the subquery retunrs a single value:
+
+	INSERT INTO TableName(Comma, Separated, ListOf, ColumnNames)
+	VALUES ('A', (SELECT SingleValue FROM SomeTable), 'Per', 'Column')
+
     Another syntax for the INSERT statement is to use a SELECT clause in place
     of the VALUES clause. This is used for zero-to-many possible rows to insert.
 
@@ -48,7 +54,12 @@ FROM    Position
 WHERE   PositionID NOT IN (SELECT PositionID FROM Staff)
 --      Add Sheldon Murray as the new Assistant Dean.
 -- TODO: Student Answer Here....
-
+INSERT INTO Staff(FirstName, LastName, DateHired, PositionID)
+-- VALUES ('Sheldon', 'Murray', GETDATE())
+SELECT 'Sheldon', 'Murray', GETDATE(), PositionID
+FROM Position
+WHERE PositionDescription = 'Assistant Dean'
+-- Select * From Staff
 -- 3. There are three additional clubs being started at the school:
 --      - START - Small Tech And Research Teams
 --      - CALM - Coping And Lifestyle Management
@@ -63,8 +74,17 @@ VALUES ('START', 'Small Tech And Research Teams'),
 -- 4. In your web browser, use https://randomuser.me/ to get information on three
 --    people to add as new students. Write separate insert statement for each new student.
 -- TODO: Student Answer Here....
+INSERT INTO Student(FirstName, LastName, Gender,Birthdate)
+VALUES ('Rosa', 'Rodriguez','F','January 2 1989')
 
+INSERT INTO Student(FirstName, LastName, Gender,Birthdate)
+VALUES ('Jane', 'Obrien','F','April 22 1950')
 
+INSERT INTO Student(FirstName, LastName, Gender,Birthdate)
+VALUES ('Charlie', 'Curtis','M','September 30 2000')
 -- 5. Enroll each of the students you've added into the DMIT777 course.
 --    Use 'Dan Gilleland' as the instructor. At this point, their marks should be NULL.
 -- TODO: Student Answer Here....
+
+
+
