@@ -4,6 +4,17 @@
 USE [A01-School]
 GO
 
+-- What is a Tramsaction?
+-- A transaction is typically needed whe we do two or more of an Insert/Update/Delete.
+-- A transaction must suceed or fail as a group.
+--How do we start a transaction?
+-- BEGIN TRANSACTION
+--		the BEGIN TRANSACTION only needs to be stated once
+-- To make a transaction succeed we use the statement COMMIT TRANSACTION
+--		the COMMIT TRANSACTION should obly be used once
+-- To make a transaction fail, we use the statement ROLLBACK TRANSACTION
+--		We will 
+
 /*
 IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.ROUTINES WHERE ROUTINE_TYPE = N'PROCEDURE' AND ROUTINE_NAME = 'SprocName')
     DROP PROCEDURE SprocName
@@ -34,6 +45,7 @@ AS
     BEGIN
         RAISERROR('All parameters are required (cannot be null)', 16, 1)
     END
+	-- we may be asked to do other validation
     ELSE
     BEGIN
         -- Begin Transaction
@@ -78,6 +90,16 @@ AS
 RETURN
 GO
 
+-- Test my store procedure
+-- sp_help TransferCourse
+-- SELECT * FROM Registration
+-- SELECT * FROM Course
+
+EXEC TransferCourse 199899200, '2004J', 'DMIT152','DMIT101'
+--Testing with "bad" data
+EXEC TransferCourse 5, '2004J', 'DMIT152','DMIT101'	-- Bad studentID
+EXEC TransferCourse 199899200, '2020J', 'DMIT152','DMIT101' -- Bad semester
+EXEC TransferCourse 199899200, '2004J', 'DMIT101','DMIT999' -- Non-existing course to enter
 
 -- 2. Add a stored procedure called AdjustMarks that takes in a course ID. The procedure should adjust the marks of all students for that course by increasing the mark by 10%. Be sure that nobody gets a mark over 100%.
 IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.ROUTINES WHERE ROUTINE_TYPE = N'PROCEDURE' AND ROUTINE_NAME = 'AdjustMarks')
@@ -454,3 +476,60 @@ AS
 RETURN
 GO
 
+-- Create a store procedure called DissolveClub that will a ccept a club id as its parameter. Ensure that the cluiub exists before attempting 
+-- to dissolve the club. You are to dissoolve thje club by first removing all the members of the club and then removing the club iteslf.
+-- Delete of rows in the Activity Table
+-- Delete of rows in the club Table
+
+
+IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.ROUTINES WHERE ROUTINE_TYPE = N'PROCEDURE' AND ROUTINE_NAME = 'SprocName')
+    DROP PROCEDURE DissolveClub
+GO
+CREATE PROCEDURE DissolveClub
+    -- Parameters here
+	@ClubId		varchar(10)
+AS
+	-- Validation
+	-- A) Make sure the ClubId is not Null
+	IF @ClubId is NULL
+	BEGIN
+		RAISERROR('ClubID is required',16,1)
+	END
+	ELSE
+	BEGIN
+		-- Transaction
+		BEGIN TRANSACTION -- Starts the transaction - everything is temporary
+		-- 1) Remove the members of the club (from Activity Table
+		DELETE FROM Activity WHERE ClubId = @ClubId
+		IF @@ERROR <> 0 -- then there's a problem with the delete; no need to check @@ROWCOUNT
+		BEGIN
+			RAISERROR('Unable to remove members from the club', 16, 1)
+			ROLLBACK TRANSACTION -- Ending/undoing any temporary DML statments
+		END
+		ELSE
+		BEGIN
+		-- 2) Remove the club
+		DELETE FROM Club WHERE ClubId = @ClubId
+		IF @@ERROR <> 0 OR @@ROWCOUNT = 0 -- theres a problem
+		BEGIN
+			ROLLBACK TRANSACTION
+			RAISERROR('Unable to delete the club',16,1)
+			-- 16 is the error number
+			-- 1 is the severity
+		END
+		ELSE
+		BEGIN
+			COMMIT TRANSACTION -- Finalize all the all the temporrary DML statements
+		END
+		END
+		END
+RETURN
+GO
+
+-- Test my stored procedure
+-- SELECT * FROM Club
+-- SELECT * FROM Activity
+EXEC DissolveClub 'CSS'
+EXEC DissolveClub 'NASA1'
+-- Test with "bad" data
+EXEC DissolveClub 'Wha?'
